@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   Animated,
   PanResponder,
-  Platform
+  Platform,
+  SafeAreaView,
 } from "react-native";
 import styles from "./style";
 
@@ -89,6 +90,7 @@ class RBSheet extends Component {
 
   render() {
     const {
+      height,
       animationType,
       closeOnDragDown,
       dragFromTopOnly,
@@ -96,13 +98,35 @@ class RBSheet extends Component {
       closeOnPressBack,
       children,
       customStyles,
-      keyboardAvoidingViewEnabled
+      keyboardAvoidingViewEnabled,
+      safeAreaViewEnabled
     } = this.props;
     const { animatedHeight, pan, modalVisible } = this.state;
     const panStyle = {
       transform: pan.getTranslateTransform()
     };
-
+    let adjustedHeight
+    if (height > animatedHeight._value) {
+      adjustedHeight = animatedHeight
+    }
+    else {
+      adjustedHeight = height
+    }
+    const content =
+      <Animated.View
+        {...(!dragFromTopOnly && this.panResponder.panHandlers)}
+        style={[panStyle, styles.container, { height: adjustedHeight }, customStyles.container]}
+      >
+        {closeOnDragDown && (
+          <View
+            {...(dragFromTopOnly && this.panResponder.panHandlers)}
+            style={styles.draggableContainer}
+          >
+            <View style={[styles.draggableIcon, customStyles.draggableIcon]} />
+          </View>
+        )}
+        {children}
+      </Animated.View>
     return (
       <Modal
         transparent
@@ -123,20 +147,13 @@ class RBSheet extends Component {
             activeOpacity={1}
             onPress={() => (closeOnPressMask ? this.close() : null)}
           />
-          <Animated.View
-            {...(!dragFromTopOnly && this.panResponder.panHandlers)}
-            style={[panStyle, styles.container, { height: animatedHeight }, customStyles.container]}
-          >
-            {closeOnDragDown && (
-              <View
-                {...(dragFromTopOnly && this.panResponder.panHandlers)}
-                style={styles.draggableContainer}
-              >
-                <View style={[styles.draggableIcon, customStyles.draggableIcon]} />
-              </View>
-            )}
-            {children}
-          </Animated.View>
+          {safeAreaViewEnabled ? (
+            <SafeAreaView
+              enabled={safeAreaViewEnabled}
+              style={[styles.container, customStyles.container, { height: undefined }]}>
+              {content}
+            </SafeAreaView>
+          ) : content}
         </KeyboardAvoidingView>
       </Modal>
     );
@@ -154,6 +171,7 @@ RBSheet.propTypes = {
   dragFromTopOnly: PropTypes.bool,
   closeOnPressBack: PropTypes.bool,
   keyboardAvoidingViewEnabled: PropTypes.bool,
+  safeAreaViewEnabled: PropTypes.bool,
   customStyles: PropTypes.objectOf(PropTypes.object),
   onClose: PropTypes.func,
   onOpen: PropTypes.func,
@@ -171,6 +189,7 @@ RBSheet.defaultProps = {
   closeOnPressMask: true,
   closeOnPressBack: true,
   keyboardAvoidingViewEnabled: Platform.OS === "ios",
+  safeAreaViewEnabled: false,
   customStyles: {},
   onClose: null,
   onOpen: null,
