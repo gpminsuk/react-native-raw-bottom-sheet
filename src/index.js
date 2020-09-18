@@ -114,14 +114,11 @@ class RBSheet extends Component {
     }
     const content =
       <Animated.View
-        {...(!dragFromTopOnly && this.panResponder.panHandlers)}
-        style={[panStyle, styles.container, { height: adjustedHeight }, customStyles.container]}
-      >
+        style={[styles.container, { height: adjustedHeight }, customStyles.container]}>
         {closeOnDragDown && (
           <View
             {...(dragFromTopOnly && this.panResponder.panHandlers)}
-            style={styles.draggableContainer}
-          >
+            style={styles.draggableContainer}>
             <View style={[styles.draggableIcon, customStyles.draggableIcon]} />
           </View>
         )}
@@ -147,13 +144,17 @@ class RBSheet extends Component {
             activeOpacity={1}
             onPress={() => (closeOnPressMask ? this.close() : null)}
           />
-          {safeAreaViewEnabled ? (
-            <SafeAreaView
-              enabled={safeAreaViewEnabled}
-              style={[styles.container, customStyles.container, { height: undefined }]}>
-              {content}
-            </SafeAreaView>
-          ) : content}
+          <Animated.View
+            {...(!dragFromTopOnly && this.panResponder.panHandlers)}
+            style={[panStyle]}>
+            {safeAreaViewEnabled ? (
+              <SafeAreaView
+                enabled={safeAreaViewEnabled}
+                style={[styles.container, customStyles.container, { height: undefined }]}>
+                {content}
+              </SafeAreaView>
+            ) : content}
+          </Animated.View>
         </KeyboardAvoidingView>
       </Modal>
     );
