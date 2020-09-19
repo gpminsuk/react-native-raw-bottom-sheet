@@ -122,7 +122,9 @@ class RBSheet extends Component {
             <View style={[styles.draggableIcon, customStyles.draggableIcon]} />
           </View>
         )}
-        {children}
+        <View style={{ flex: 1 }}>
+          {children}
+        </View>
       </Animated.View>
     return (
       <Modal
